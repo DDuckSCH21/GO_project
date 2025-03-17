@@ -28,10 +28,8 @@ func findNextKey() int {
 }
 
 func pathHandler(r *http.Request, w *http.ResponseWriter) int {
-
 	parts := strings.Split(r.URL.Path, "/")
 	id, _ := strconv.Atoi(parts[len(parts)-1]) //TODO Обработать ошибку //Колхозненько
-
 	return id
 }
 
@@ -39,7 +37,6 @@ func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает кон�
 	//TODO вернуть конкретного user по id
 
 	user, ok := globalDB[id]
-
 	if ok {
 		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
 	} else {
@@ -49,7 +46,6 @@ func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает кон�
 }
 
 func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
-	//TODO вернуть всех users из globalDB
 	var buf bytes.Buffer
 	if len(globalDB) != 0 {
 		for ind, val := range globalDB {
@@ -63,10 +59,23 @@ func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
 
 func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновляет данные по id
 	//TODO найти в globalDB и обновить те данные, которые пришли
+	defer r.Body.Close()
+	var newUser User
+
+	user, ok := globalDB[id]
+	if ok {
+		err := json.NewDecoder(r.Body).Decode(&newUser.Data)
+		if err != nil {
+			http.Error(*w, "Error: Decode JSON", http.StatusBadRequest)
+			return
+		}
+		user.Data = newUser.Data
+		globalDB[id] = user //Сразу обновить данные в мапе нельзя
+	}
 }
 
 func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить новую запись в globalDB, возвращает новый id
-	defer r.Body.Close() //
+	defer r.Body.Close()
 
 	var user User
 	newKey := 1
@@ -87,9 +96,6 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 	user.Id = newKey
 	globalDB[newKey] = user
 	fmt.Fprintf(*w, "Add new User id=[%d]", newKey)
-
-	// fmt.Println("globalDB.data=", user.Data)
-
 }
 
 func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по id
@@ -98,8 +104,6 @@ func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по i
 
 func usersIdHandler(w http.ResponseWriter, r *http.Request) {
 	idUser := pathHandler(r, &w)
-
-	fmt.Printf("USERID=%d\n", idUser)
 
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
@@ -132,15 +136,11 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-
 }
 
 func main() {
 	http.HandleFunc("/users", usersHandler)
 	http.HandleFunc("/users/", usersIdHandler)
-
 	http.ListenAndServe(":8080", nil)
 
 }
-
-///users/:id
