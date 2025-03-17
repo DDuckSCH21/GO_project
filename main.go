@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -40,16 +41,24 @@ func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает кон�
 	user, ok := globalDB[id]
 
 	if ok {
-		fmt.Fprintf(*w, "User ID=%d: %v\n", id, user.Data)
+		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
 	} else {
-		fmt.Fprintf(*w, "User id=%d not found\n", id)
+		fmt.Fprintf(*w, "User ID =%d not found\n", id)
 	}
 
 }
 
 func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
 	//TODO вернуть всех users из globalDB
-	//ИЛИ конкретного user по id
+	var buf bytes.Buffer
+	if len(globalDB) != 0 {
+		for ind, val := range globalDB {
+			fmt.Fprintf(&buf, "User ID = %d: %v\n", ind, val)
+		}
+		fmt.Fprintln(*w, &buf)
+	} else {
+		fmt.Fprintln(*w, "No Data")
+	}
 }
 
 func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновляет данные по id
