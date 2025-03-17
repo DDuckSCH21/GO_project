@@ -11,7 +11,7 @@ import (
 
 type User struct {
 	Id   int
-	Data map[string]interface{}
+	Data map[string]any
 }
 
 var globalDB = make(map[int]User)
@@ -29,13 +29,21 @@ func findNextKey() int {
 func pathHandler(r *http.Request, w *http.ResponseWriter) int {
 
 	parts := strings.Split(r.URL.Path, "/")
+	id, _ := strconv.Atoi(parts[len(parts)-1]) //TODO Обработать ошибку //Колхозненько
 
-	id, _ := strconv.Atoi(parts[1]) //TODO Обработать ошибку
 	return id
 }
 
-func getUsers(w *http.ResponseWriter, id int) { //Возвращает конкретного user по id
+func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает конкретного user по id
 	//TODO вернуть конкретного user по id
+
+	user, ok := globalDB[id]
+
+	if ok {
+		fmt.Fprintf(*w, "User ID=%d: %v\n", id, user.Data)
+	} else {
+		fmt.Fprintf(*w, "User id=%d not found\n", id)
+	}
 
 }
 
@@ -56,13 +64,18 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 
 	err := json.NewDecoder(r.Body).Decode(&user.Data) //пока так
 	if err != nil {
-		http.Error(*w, "Error Decode JSON", http.StatusBadRequest)
+		if err.Error() == "EOF" {
+			http.Error(*w, "Error: Empty Request", http.StatusBadRequest)
+		} else {
+			http.Error(*w, "Error: Decode JSON", http.StatusBadRequest)
+		}
+		return
 	}
 
 	if len(globalDB) != 0 {
 		newKey = findNextKey()
 	}
-
+	user.Id = newKey
 	globalDB[newKey] = user
 	fmt.Fprintf(*w, "Add new User id=[%d]", newKey)
 
@@ -77,12 +90,17 @@ func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по i
 func usersIdHandler(w http.ResponseWriter, r *http.Request) {
 	idUser := pathHandler(r, &w)
 
+	fmt.Printf("USERID=%d\n", idUser)
+
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
-		getUsers(&w, idUser)
+		fmt.Println("GET /users/:id")
+		getIdUsers(&w, idUser)
 	case http.MethodPut: //PUT /users/:id
+		fmt.Println("PUT /users/:id")
 		putIdUser(&w, r, idUser)
 	case http.MethodDelete: //DELETE /users/:id
+		fmt.Println("DELETE /users/:id")
 		deleteIdUser(&w, idUser)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -97,8 +115,10 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet: //GET /users
+		fmt.Println("GET /users")
 		getAllUsers(&w)
 	case http.MethodPost: //POST /users
+		fmt.Println("POST /users")
 		postUser(&w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
