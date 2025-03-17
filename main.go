@@ -99,7 +99,12 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 }
 
 func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по id
-	//берем part[2] и по нему удаляем из globalDB
+	_, ok := globalDB[id]
+	if ok {
+		delete(globalDB, id)
+	} else {
+		fmt.Fprintf(*w, "User ID =%d not found\n", id)
+	}
 }
 
 func usersIdHandler(w http.ResponseWriter, r *http.Request) {
