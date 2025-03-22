@@ -8,14 +8,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"go_project/internal/models"
 )
 
-type User struct {
-	Id   int
-	Data map[string]any
-}
-
-var globalDB = make(map[int]User)
+var globalDB = make(map[int]models.User)
 
 func findNextKey() int {
 	maxKey := math.MinInt
@@ -60,7 +57,7 @@ func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
 func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновляет данные по id
 	//TODO найти в globalDB и обновить те данные, которые пришли
 	defer r.Body.Close()
-	var newUser User
+	var newUser models.User
 
 	user, ok := globalDB[id]
 	if ok {
@@ -77,7 +74,7 @@ func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновл
 func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить новую запись в globalDB, возвращает новый id
 	defer r.Body.Close()
 
-	var user User
+	var user models.User
 	newKey := 1
 
 	err := json.NewDecoder(r.Body).Decode(&user.Data) //пока так
