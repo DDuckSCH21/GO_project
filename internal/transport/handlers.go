@@ -12,14 +12,19 @@ import (
 	"strings"
 )
 
-func findNextKey() int {
-	maxKey := math.MinInt
-	for num := range global.DB {
-		if maxKey < num {
-			maxKey = num
+func getNewKey() int {
+
+	if len(global.DB) != 0 {
+
+		maxKey := math.MinInt
+		for num := range global.DB {
+			if maxKey < num {
+				maxKey = num
+			}
 		}
+		return maxKey + 1
 	}
-	return maxKey + 1
+	return 1
 }
 
 func pathHandler(r *http.Request, w *http.ResponseWriter) int {
@@ -73,7 +78,6 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 	defer r.Body.Close()
 
 	var user models.User
-	newKey := 1
 
 	err := json.NewDecoder(r.Body).Decode(&user.Data) //пока так
 	if err != nil {
@@ -85,12 +89,9 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 		return
 	}
 
-	if len(global.DB) != 0 {
-		newKey = findNextKey()
-	}
-	user.Id = newKey
-	global.DB[newKey] = user
-	fmt.Fprintf(*w, "Add new User id=[%d]", newKey)
+	user.Id = getNewKey()
+	global.DB[user.Id] = user
+	fmt.Fprintf(*w, "Add new User id=[%d]", user.Id)
 }
 
 func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по id
