@@ -1,13 +1,20 @@
 package main
 
 import (
+	"github.com/go-chi/chi/v5"
 	"go_project/internal/transport"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/users", transport.UsersHandler)
-	http.HandleFunc("/users/", transport.UsersIdHandler)
+
+	r := chi.NewRouter()
+
+	r.HandleFunc("/users", transport.UsersHandler)
+	r.HandleFunc("/users/", transport.UsersIdHandler)
+
+	// http.HandleFunc("/users", transport.UsersHandler)
+	// http.HandleFunc("/users/", transport.UsersIdHandler)
 	http.ListenAndServe(":8080", nil)
 
 }
