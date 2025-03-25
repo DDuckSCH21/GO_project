@@ -13,8 +13,6 @@ func main() {
 	r.HandleFunc("/users", transport.UsersHandler)
 	r.HandleFunc("/users/", transport.UsersIdHandler)
 
-	// http.HandleFunc("/users", transport.UsersHandler)
-	// http.HandleFunc("/users/", transport.UsersIdHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 
 }
