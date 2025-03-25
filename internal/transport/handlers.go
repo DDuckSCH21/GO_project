@@ -40,9 +40,9 @@ func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает кон�
 	if ok {
 		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
 	} else {
-		fmt.Fprintf(*w, "User ID =%d not found\n", id)
+		// fmt.Fprintf(*w, "User ID =%d not found\n", id)
+		http.Error(*w, "User not found", http.StatusNotFound)
 	}
-
 }
 
 func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
