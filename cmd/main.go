@@ -14,5 +14,4 @@ func main() {
 	r.HandleFunc("/users/", transport.UsersIdHandler)
 
 	http.ListenAndServe(":8080", r)
-
 }
