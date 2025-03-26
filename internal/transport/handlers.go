@@ -12,6 +12,11 @@ import (
 	"strings"
 )
 
+func sendStatus(status int, w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
+}
+
 func getNewKey() int {
 
 	if len(global.DB) != 0 {
@@ -40,7 +45,6 @@ func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает кон�
 	if ok {
 		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
 	} else {
-		// fmt.Fprintf(*w, "User ID =%d not found\n", id)
 		http.Error(*w, "User not found", http.StatusNotFound)
 	}
 }
@@ -71,6 +75,7 @@ func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновл
 		}
 		user.Data = newUser.Data
 		global.DB[id] = user //Сразу обновить данные в мапе нельзя
+		sendStatus(http.StatusCreated, *w, r)
 	} else {
 		http.Error(*w, "Error: id not found", http.StatusNotFound)
 	}
