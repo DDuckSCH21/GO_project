@@ -71,6 +71,8 @@ func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновл
 		}
 		user.Data = newUser.Data
 		global.DB[id] = user //Сразу обновить данные в мапе нельзя
+	} else {
+		http.Error(*w, "Error: id not found", http.StatusNotFound)
 	}
 }
 
@@ -105,7 +107,8 @@ func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по i
 
 func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
 	idUser := pathHandler(r, &w)
-
+	global.MyMute.Lock()
+	defer global.MyMute.Unlock()
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
 		getIdUsers(&w, idUser)
@@ -119,6 +122,9 @@ func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UsersHandler(w http.ResponseWriter, r *http.Request) {
+
+	global.MyMute.Lock()
+	defer global.MyMute.Unlock()
 
 	switch r.Method {
 	case http.MethodGet: //GET /users
