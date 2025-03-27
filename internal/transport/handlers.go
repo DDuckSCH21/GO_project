@@ -116,10 +116,13 @@ func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
 	defer global.MyMute.Unlock()
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
+		fmt.Println("GET /users/id")
 		getIdUsers(&w, idUser)
 	case http.MethodPut: //PUT /users/:id
+		fmt.Println("PUT /users/id")
 		putIdUser(&w, r, idUser)
 	case http.MethodDelete: //DELETE /users/:id
+		fmt.Println("DELETE /users/id")
 		deleteIdUser(&w, idUser)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

@@ -11,7 +11,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.HandleFunc("/users", transport.UsersHandler)
-	r.HandleFunc("/users/", transport.UsersIdHandler)
+	r.HandleFunc("/users/{id}", transport.UsersIdHandler)
 
 	http.ListenAndServe(":8080", r)
 }
