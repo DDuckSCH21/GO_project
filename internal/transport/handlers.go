@@ -12,9 +12,11 @@ import (
 	"strings"
 )
 
-func sendStatus(status int, w http.ResponseWriter, r *http.Request) {
+func sendStatus(status int, w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(status)
+	if status != 200 {
+		w.WriteHeader(status)
+	}
 }
 
 func getNewKey() int {
@@ -44,6 +46,7 @@ func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает кон�
 	user, ok := global.DB[id]
 	if ok {
 		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
+		sendStatus(http.StatusOK, *w) // 200 - по дефолту отправляется, не надо еще раз это делать
 	} else {
 		http.Error(*w, "User not found", http.StatusNotFound)
 	}
@@ -55,6 +58,7 @@ func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
 		for ind, val := range global.DB {
 			fmt.Fprintf(&buf, "User ID = %d: %v\n", ind, val)
 		}
+		sendStatus(http.StatusOK, *w)
 		fmt.Fprintln(*w, &buf)
 	} else {
 		fmt.Fprintln(*w, "No Data")
@@ -75,7 +79,7 @@ func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновл
 		}
 		user.Data = newUser.Data
 		global.DB[id] = user //Сразу обновить данные в мапе нельзя
-		sendStatus(http.StatusCreated, *w, r)
+		sendStatus(http.StatusOK, *w)
 	} else {
 		http.Error(*w, "Error: id not found", http.StatusNotFound)
 	}
@@ -98,7 +102,9 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 
 	user.Id = getNewKey()
 	global.DB[user.Id] = user
+	sendStatus(http.StatusCreated, *w)
 	fmt.Fprintf(*w, "Add new User id=[%d]", user.Id)
+
 }
 
 func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по id
