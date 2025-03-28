@@ -41,8 +41,6 @@ func pathHandler(r *http.Request, w *http.ResponseWriter) int {
 }
 
 func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает конкретного user по id
-	//TODO вернуть конкретного user по id
-
 	user, ok := global.DB[id]
 	if ok {
 		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
@@ -122,13 +120,10 @@ func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
 	defer global.MyMute.Unlock()
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
-		fmt.Println("GET /users/id")
 		getIdUsers(&w, idUser)
 	case http.MethodPut: //PUT /users/:id
-		fmt.Println("PUT /users/id")
 		putIdUser(&w, r, idUser)
 	case http.MethodDelete: //DELETE /users/:id
-		fmt.Println("DELETE /users/id")
 		deleteIdUser(&w, idUser)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -142,10 +137,8 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet: //GET /users
-		fmt.Println("GET /users")
 		getAllUsers(&w)
 	case http.MethodPost: //POST /users
-		fmt.Println("POST /users")
 		postUser(&w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
