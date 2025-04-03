@@ -34,36 +34,36 @@ func getNewKey() int {
 	return 1
 }
 
-func pathHandler(r *http.Request, w *http.ResponseWriter) int {
+func pathHandler(r *http.Request, w http.ResponseWriter) int {
 	parts := strings.Split(r.URL.Path, "/")
 	id, _ := strconv.Atoi(parts[len(parts)-1]) //TODO Обработать ошибку //Колхозненько
 	return id
 }
 
-func getIdUsers(w *http.ResponseWriter, id int) { //Возвращает конкретного user по id
+func getIdUsers(w http.ResponseWriter, id int) { //Возвращает конкретного user по id
 	user, ok := global.DB[id]
 	if ok {
-		fmt.Fprintf(*w, "User ID = %d: %v\n", id, user.Data)
-		sendStatus(http.StatusOK, *w) // 200 - по дефолту отправляется, не надо еще раз это делать
+		fmt.Fprintf(w, "User ID = %d: %v\n", id, user.Data)
+		sendStatus(http.StatusOK, w) // 200 - по дефолту отправляется, не надо еще раз это делать
 	} else {
-		http.Error(*w, "User not found", http.StatusNotFound)
+		http.Error(w, "User not found", http.StatusNotFound)
 	}
 }
 
-func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
+func getAllUsers(w http.ResponseWriter) { //Возвращает всех users
 	var buf bytes.Buffer
 	if len(global.DB) != 0 {
 		for ind, val := range global.DB {
 			fmt.Fprintf(&buf, "User ID = %d: %v\n", ind, val)
 		}
-		sendStatus(http.StatusOK, *w)
-		fmt.Fprintln(*w, &buf)
+		sendStatus(http.StatusOK, w)
+		fmt.Fprintln(w, &buf)
 	} else {
-		fmt.Fprintln(*w, "No Data")
+		fmt.Fprintln(w, "No Data")
 	}
 }
 
-func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновляет данные по id
+func putIdUser(w http.ResponseWriter, r *http.Request, id int) { //Обновляет данные по id
 	defer r.Body.Close()
 	var newUser models.User
 
@@ -71,18 +71,18 @@ func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновл
 	if ok {
 		err := json.NewDecoder(r.Body).Decode(&newUser.Data)
 		if err != nil {
-			http.Error(*w, "Error: Decode JSON", http.StatusBadRequest)
+			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
 			return
 		}
 		user.Data = newUser.Data
 		global.DB[id] = user //Сразу обновить данные в мапе нельзя
-		sendStatus(http.StatusOK, *w)
+		sendStatus(http.StatusOK, w)
 	} else {
-		http.Error(*w, "Error: id not found", http.StatusNotFound)
+		http.Error(w, "Error: id not found", http.StatusNotFound)
 	}
 }
 
-func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить новую запись в global.DB, возвращает новый id
+func postUser(w http.ResponseWriter, r *http.Request) { //Добавить новую запись в global.DB, возвращает новый id
 	defer r.Body.Close()
 
 	var user models.User
@@ -90,40 +90,40 @@ func postUser(w *http.ResponseWriter, r *http.Request) { //Добавить но
 	err := json.NewDecoder(r.Body).Decode(&user.Data) //пока так
 	if err != nil {
 		if err.Error() == "EOF" {
-			http.Error(*w, "Error: Empty Request", http.StatusBadRequest)
+			http.Error(w, "Error: Empty Request", http.StatusBadRequest)
 		} else {
-			http.Error(*w, "Error: Decode JSON", http.StatusBadRequest)
+			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
 		}
 		return
 	}
 
 	user.Id = getNewKey()
 	global.DB[user.Id] = user
-	sendStatus(http.StatusCreated, *w)
-	fmt.Fprintf(*w, "Add new User id=[%d]", user.Id)
+	sendStatus(http.StatusCreated, w)
+	fmt.Fprintf(w, "Add new User id=[%d]", user.Id)
 
 }
 
-func deleteIdUser(w *http.ResponseWriter, id int) { //Удаляет user по id
+func deleteIdUser(w http.ResponseWriter, id int) { //Удаляет user по id
 	_, ok := global.DB[id]
 	if ok {
 		delete(global.DB, id)
 	} else {
-		fmt.Fprintf(*w, "User ID =%d not found\n", id)
+		fmt.Fprintf(w, "User ID =%d not found\n", id)
 	}
 }
 
 func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
-	idUser := pathHandler(r, &w)
+	idUser := pathHandler(r, w)
 	global.MyMute.Lock()
 	defer global.MyMute.Unlock()
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
-		getIdUsers(&w, idUser)
+		getIdUsers(w, idUser)
 	case http.MethodPut: //PUT /users/:id
-		putIdUser(&w, r, idUser)
+		putIdUser(w, r, idUser)
 	case http.MethodDelete: //DELETE /users/:id
-		deleteIdUser(&w, idUser)
+		deleteIdUser(w, idUser)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -136,9 +136,9 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet: //GET /users
-		getAllUsers(&w)
+		getAllUsers(w)
 	case http.MethodPost: //POST /users
-		postUser(&w, r)
+		postUser(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
