@@ -64,7 +64,6 @@ func getAllUsers(w *http.ResponseWriter) { //Возвращает всех users
 }
 
 func putIdUser(w *http.ResponseWriter, r *http.Request, id int) { //Обновляет данные по id
-	//TODO найти в global.DB и обновить те данные, которые пришли
 	defer r.Body.Close()
 	var newUser models.User
 
