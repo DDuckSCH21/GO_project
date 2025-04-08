@@ -5,9 +5,9 @@ import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '30s', target: 50 },  // Постепенно увеличиваем нагрузку до 50 пользователей
-    { duration: '60s', target: 100 },  // Держим 100 пользователей
-    { duration: '20s', target: 0 },   // Плавно завершаем тест
+    { duration: '5s', target: 50 },  // Постепенно увеличиваем нагрузку до 50 пользователей
+    { duration: '5s', target: 100 },  // Держим 100 пользователей
+    { duration: '5s', target: 0 },   // Плавно завершаем тест
   ],
 };
 

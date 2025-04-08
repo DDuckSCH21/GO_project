@@ -31,26 +31,17 @@ func (glob *DBst) Del(id int) bool {
 }
 
 func (glob *DBst) Set(id int, usr models.User) bool {
-	fmt.Printf("Test DB.Set; id=%d\n", id)
 
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
 
-	// _, ok := glob.DBglobal[id] //
-	// if ok {
 	glob.DBglobal[id] = usr
-	fmt.Printf("Test DB.Set_2; true\n", id)
+	fmt.Printf("Test DB.Set_2; true\n")
 
 	return true
-	// } else {
-	// 	fmt.Printf("Test DB.Set_2; false\n", id)
-
-	// 	return false
-	// }
 }
 
 func (glob *DBst) GetAll() bytes.Buffer {
-	fmt.Printf("Test DB.GetAll\n")
 
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
@@ -66,7 +57,7 @@ func (glob *DBst) GetAll() bytes.Buffer {
 }
 
 func (glob *DBst) Get(id int) (usr models.User, status bool) {
-	fmt.Printf("Test DB.Get; id=%d\n", id)
+
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
 
@@ -79,7 +70,6 @@ func (glob *DBst) Get(id int) (usr models.User, status bool) {
 }
 
 func (glob *DBst) IsEmpty() bool {
-	fmt.Printf("Test DB.IsEmpty\n")
 
 	if len(glob.DBglobal) != 0 {
 		return false
@@ -89,7 +79,6 @@ func (glob *DBst) IsEmpty() bool {
 }
 
 func (glob *DBst) GetNewKey() int {
-	fmt.Printf("Test DB.GetNewKey_in\n")
 
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
@@ -100,9 +89,7 @@ func (glob *DBst) GetNewKey() int {
 				maxKey = num
 			}
 		}
-		fmt.Printf("Test DB.GetNewKey_out ret=%d\n", maxKey+1)
 		return maxKey + 1
 	}
-	fmt.Printf("Test DB.GetNewKey_out ret=1\n")
 	return 1
 }

@@ -30,8 +30,8 @@ func pathHandler(r *http.Request, w http.ResponseWriter) int {
 func getIdUsers(w http.ResponseWriter, id int) { //Возвращает конкретного user по id
 	user, ok := global.DB.Get(id)
 	if ok {
-		fmt.Fprintf(w, "User ID = %d: %v\n", id, user.Data)
 		sendStatus(http.StatusOK, w) // 200 - по дефолту отправляется, не надо еще раз это делать
+		fmt.Fprintf(w, "User ID = %d: %v\n", id, user.Data)
 	} else {
 		http.Error(w, "User not found", http.StatusNotFound)
 	}
@@ -81,18 +81,13 @@ func postUser(w http.ResponseWriter, r *http.Request) { //Добавить но�
 		}
 		return
 	}
-	fmt.Printf("Test Post 2\n")
 	user.Id = global.DB.GetNewKey()
 	global.DB.Set(user.Id, user)
 	sendStatus(http.StatusCreated, w)
-	fmt.Printf("Test_Post Add new User id=[%d]\n", user.Id)
-
 	fmt.Fprintf(w, "Add new User id=[%d]\n", user.Id)
-
 }
 
 func deleteIdUser(w http.ResponseWriter, id int) { //Удаляет user по id
-	fmt.Printf("Test Del; id=%d\n", id)
 	ok := global.DB.Del(id)
 	if ok {
 		sendStatus(http.StatusOK, w)
