@@ -15,8 +15,6 @@ type DBst struct {
 	DBglobal map[int]models.User
 }
 
-// var DBglobal = make(map[int]models.User)
-
 func (glob *DBst) Del(id int) bool {
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
@@ -31,13 +29,11 @@ func (glob *DBst) Del(id int) bool {
 }
 
 func (glob *DBst) Set(id int, usr models.User) bool {
-	// var newUser models.User
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
 
 	_, ok := glob.DBglobal[id]
 	if ok {
-		// user.Data = newUser.Data
 		glob.DBglobal[id] = usr
 		return true
 	} else {
@@ -77,7 +73,6 @@ func (glob *DBst) IsEmpty() bool {
 	} else {
 		return true
 	}
-
 }
 
 func (glob *DBst) GetNewKey() int {

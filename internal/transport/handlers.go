@@ -55,9 +55,7 @@ func putIdUser(w http.ResponseWriter, r *http.Request, id int) { //Обновл�
 			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
 			return
 		}
-		// user.Data = newUser.Data
-		// global.DBglobal[id] = user //Должен быть glob.Set
-		global.DB.Set(id, newUser) //TODO Проверить. Хрень какая-то нерабочая
+		global.DB.Set(id, newUser) //TODO Проверить. Хрень будто какая-то нерабочая
 		sendStatus(http.StatusOK, w)
 	} else {
 		http.Error(w, "Error: id not found", http.StatusNotFound)
@@ -78,9 +76,7 @@ func postUser(w http.ResponseWriter, r *http.Request) { //Добавить но�
 		}
 		return
 	}
-
 	user.Id = global.DB.GetNewKey()
-	// global.DBglobal[user.Id] = user //global.Set
 	global.DB.Set(user.Id, user)
 	sendStatus(http.StatusCreated, w)
 	fmt.Fprintf(w, "Add new User id=[%d]", user.Id)
@@ -88,10 +84,8 @@ func postUser(w http.ResponseWriter, r *http.Request) { //Добавить но�
 }
 
 func deleteIdUser(w http.ResponseWriter, id int) { //Удаляет user по id
-	// _, ok := global.DBglobal[id]
 	ok := global.DB.Del(id)
 	if ok {
-		// delete(global.DBglobal, id) //global.Del
 		sendStatus(http.StatusOK, w)
 	} else {
 		fmt.Fprintf(w, "User ID =%d not found\n", id)
@@ -100,8 +94,7 @@ func deleteIdUser(w http.ResponseWriter, id int) { //Удаляет user по id
 
 func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
 	idUser := pathHandler(r, w)
-	// global.MyMute.Lock()
-	// defer global.MyMute.Unlock()
+
 	switch r.Method {
 	case http.MethodGet: //GET /users/:id
 		getIdUsers(w, idUser)
@@ -115,10 +108,6 @@ func UsersIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UsersHandler(w http.ResponseWriter, r *http.Request) {
-
-	// global.MyMute.Lock()
-	// defer global.MyMute.Unlock()
-
 	switch r.Method {
 	case http.MethodGet: //GET /users
 		getAllUsers(w)
