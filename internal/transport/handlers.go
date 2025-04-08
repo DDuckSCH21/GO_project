@@ -68,7 +68,6 @@ func putIdUser(w http.ResponseWriter, r *http.Request, id int) { //Обновл�
 
 func postUser(w http.ResponseWriter, r *http.Request) { //Добавить новую запись в global.DB, возвращает новый id
 	defer r.Body.Close()
-	fmt.Printf("Test Post\n")
 
 	var user models.User
 

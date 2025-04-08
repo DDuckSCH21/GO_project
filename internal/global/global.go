@@ -16,18 +16,12 @@ type DBst struct {
 }
 
 func (glob *DBst) Del(id int) bool {
-	fmt.Printf("Test DB.Del; id=%d\n", id)
 
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
 
-	// _, ok := glob.DBglobal[id] //Лишняя какая-то проверка
-	// if ok {
 	delete(glob.DBglobal, id)
 	return true
-	// } else {
-	// 	return false
-	// }
 }
 
 func (glob *DBst) Set(id int, usr models.User) bool {
@@ -36,8 +30,6 @@ func (glob *DBst) Set(id int, usr models.User) bool {
 	defer glob.MyMute.Unlock()
 
 	glob.DBglobal[id] = usr
-	fmt.Printf("Test DB.Set_2; true\n")
-
 	return true
 }
 
