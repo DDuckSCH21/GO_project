@@ -19,7 +19,11 @@ func sendStatus(status int, w http.ResponseWriter) {
 
 func pathHandler(r *http.Request, w http.ResponseWriter) int {
 	parts := strings.Split(r.URL.Path, "/")
-	id, _ := strconv.Atoi(parts[len(parts)-1]) //TODO Обработать ошибку //Колхозненько
+	id, err := strconv.Atoi(parts[len(parts)-1])
+	if err != nil {
+		http.Error(w, "Error: Parsing path. strconv.Atoi", http.StatusBadRequest) //TODO Обработать ошибку //Колхозненько
+		return -1
+	}
 	return id
 }
 
@@ -64,6 +68,7 @@ func putIdUser(w http.ResponseWriter, r *http.Request, id int) { //Обновл�
 
 func postUser(w http.ResponseWriter, r *http.Request) { //Добавить новую запись в global.DB, возвращает новый id
 	defer r.Body.Close()
+	fmt.Printf("Test Post\n")
 
 	var user models.User
 
@@ -76,19 +81,23 @@ func postUser(w http.ResponseWriter, r *http.Request) { //Добавить но�
 		}
 		return
 	}
+	fmt.Printf("Test Post 2\n")
 	user.Id = global.DB.GetNewKey()
 	global.DB.Set(user.Id, user)
 	sendStatus(http.StatusCreated, w)
-	fmt.Fprintf(w, "Add new User id=[%d]", user.Id)
+	fmt.Printf("Test_Post Add new User id=[%d]\n", user.Id)
+
+	fmt.Fprintf(w, "Add new User id=[%d]\n", user.Id)
 
 }
 
 func deleteIdUser(w http.ResponseWriter, id int) { //Удаляет user по id
+	fmt.Printf("Test Del; id=%d\n", id)
 	ok := global.DB.Del(id)
 	if ok {
 		sendStatus(http.StatusOK, w)
 	} else {
-		fmt.Fprintf(w, "User ID =%d not found\n", id)
+		fmt.Fprintf(w, "User ID = %d not found\n", id)
 	}
 }
 
