@@ -24,7 +24,7 @@ func (glob *DBst) Del(id int) bool {
 	return true
 }
 
-func (glob *DBst) Set(id int, usr models.User) bool {
+func (glob *DBst) Set(id int, usr models.User) bool { //Может лучше возвращать указатель на User??
 
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()
@@ -48,7 +48,7 @@ func (glob *DBst) GetAll() bytes.Buffer {
 	return buf
 }
 
-func (glob *DBst) Get(id int) (usr models.User, status bool) {
+func (glob *DBst) Get(id int) (usr models.User, status bool) { //Может лучше возвращать указатель на User??
 
 	glob.MyMute.Lock()
 	defer glob.MyMute.Unlock()

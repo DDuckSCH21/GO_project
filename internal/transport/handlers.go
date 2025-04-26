@@ -28,7 +28,7 @@ func pathHandler(r *http.Request, w http.ResponseWriter) int {
 }
 
 func getIdUsers(w http.ResponseWriter, id int) { //Возвращает конкретного user по id
-	user, ok := global.DB.Get(id)
+	user, ok := global.DB.Get(id) //TODO: Заменить на БД
 	if ok {
 		sendStatus(http.StatusOK, w) // 200 - по дефолту отправляется, не надо еще раз это делать
 		fmt.Fprintf(w, "User ID = %d: %v\n", id, user.Data)
