@@ -1,12 +1,27 @@
 package repository
 
 import (
-	"database/sql"
-	"go_project/internal/models"
+	"context"
+	"fmt"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	// "go_project/internal/models"
+	"os"
 )
 
 type UserRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
+}
+
+func ConnectToDB() *pgxpool.Pool {
+	pool, err := pgxpool.New(context.Background(), "postgres://myuser:mypassword321@localhost:5432/GO_project")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connection to database: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Fprintf(os.Stderr, "Connected!\n")
+	return pool
 }
 
 // func (r *UserRepository) Get(id string) (usr models.User, status bool) { //замена global.DB.Get(id)
