@@ -15,21 +15,30 @@ func main() {
 	db := repository.ConnectToDB()
 	defer db.Close()
 
-	rows, err := db.Query(context.Background(), "SELECT id, name FROM users WHERE age > $1", 18)
+	fmt.Println("INSERT")
+	rows, err := db.Query(context.Background(), "INSERT INTO public.users (id, name,age,is_student) VALUES (2,'SanPusan',21,true);") //Работает
+
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 
-	for rows.Next() {
+	fmt.Println("SELECT")
+	rows_2, err := db.Query(context.Background(), "SELECT id, name FROM public.users WHERE age > $1", 18)
+	if err != nil {
+		panic(err)
+	}
+
+	for rows_2.Next() {
 		var id int
 		var name string
-		err = rows.Scan(&id, &name)
+		err = rows_2.Scan(&id, &name)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Printf("ID: %d, Name: %s\n", id, name)
 	}
+	defer rows_2.Close()
 
 	// repo := NewUserRepository(db)
 	// service := NewUserService(repo)

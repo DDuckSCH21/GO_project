@@ -10,6 +10,9 @@ import (
 	"os"
 )
 
+//https://eax.me/golang-pgx/
+//https://github.com/jackc/pgx/wiki/Getting-started-with-pgx
+
 type UserRepository struct {
 	db *pgxpool.Pool
 }
