@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	// "fmt"
 	"github.com/go-chi/chi/v5"
 	"go_project/internal/repository"
 	"go_project/internal/transport"
@@ -12,19 +12,20 @@ import (
 func main() {
 
 	//dependency injection (DI) для связывания слоёв
-	db := repository.ConnectToDB()
+	db := repository.ConnectToDB() //TODO Обработать ошибку при отсутствии БД
 	defer db.Close()
 
-	fmt.Println("INSERT")
-	rows, err := db.Query(context.Background(), "INSERT INTO public.users (id, name,age,is_student) VALUES (2,'SanPusan',21,true);") //Работает
+	// fmt.Println("INSERT")
+	rows, err := db.Query(context.Background(), "INSERT INTO public.users (id, name,age,is_student) VALUES (2,'SanPusan',21,true);") //TODO Заготовка для postUser
 
 	if err != nil {
 		panic(err)
 	}
+	// fmt.Printf("RESULT INSERT%s\n", rows)
 	defer rows.Close()
 
-	fmt.Println("SELECT")
-	rows_2, err := db.Query(context.Background(), "SELECT id, name FROM public.users WHERE age > $1", 18)
+	// fmt.Println("SELECT")
+	rows_2, err := db.Query(context.Background(), "SELECT id, name FROM public.users") //TODO Заготовка для getAllUsers
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +37,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("ID: %d, Name: %s\n", id, name)
+		// fmt.Printf("ID: %d, Name: %s\n", id, name)
 	}
 	defer rows_2.Close()
 
