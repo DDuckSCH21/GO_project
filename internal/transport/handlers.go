@@ -1,8 +1,11 @@
 package transport
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go_project/internal/global"
 	"go_project/internal/models"
 	"net/http"
@@ -119,4 +122,36 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
+
+	// fmt.Println("INSERT")
+	rows, err := db.Query(context.Background(), "INSERT INTO public.users (id, name,age,is_student) VALUES (2,'SanPusan',21,true);") //TODO Заготовка для postUser
+
+	if err != nil {
+		panic(err)
+	}
+	// fmt.Printf("RESULT INSERT%s\n", rows)
+	defer rows.Close()
+
+	// fmt.Println("SELECT")
+	rows_2, err := db.Query(context.Background(), "SELECT id, name FROM public.users") //TODO Заготовка для getAllUsers
+	if err != nil {
+		panic(err)
+	}
+
+	for rows_2.Next() {
+		var id int
+		var name string
+		err = rows_2.Scan(&id, &name)
+		if err != nil {
+			panic(err)
+		}
+		// fmt.Printf("ID: %d, Name: %s\n", id, name)
+	}
+	defer rows_2.Close()
+
+	r.HandleFunc("/users", UsersHandler)
+	r.HandleFunc("/users/{id}", UsersIdHandler)
 }
