@@ -13,6 +13,26 @@ import (
 	"strings"
 )
 
+//FOR DATABASE
+
+func getAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query(r.Context(), "SELECT * FROM users")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+		fmt.Println("getAllUsersDB - WORK!")
+
+		// ... обработка результатов ...
+		w.Write([]byte("Users list"))
+	}
+
+}
+
+//END FOR DATABASE
+
 func sendStatus(status int, w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
 	if status != 200 {
@@ -151,6 +171,8 @@ func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 		// fmt.Printf("ID: %d, Name: %s\n", id, name)
 	}
 	defer rows_2.Close()
+
+	r.Get("/users", getAllUsersDB(db))
 
 	r.HandleFunc("/users", UsersHandler)
 	r.HandleFunc("/users/{id}", UsersIdHandler)
