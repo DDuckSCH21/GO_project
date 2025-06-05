@@ -23,10 +23,21 @@ func getAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 		defer rows.Close()
-		fmt.Println("getAllUsersDB - WORK!")
 
-		// ... обработка результатов ...
-		w.Write([]byte("Users list"))
+		var usersArr []models.User
+		for rows.Next() {
+			var uTmp models.User
+			err := rows.Scan(&uTmp.Id, &uTmp.Name, &uTmp.Age, &uTmp.Is_student)
+			if err != nil {
+				fmt.Printf("SQL ERR=%s", err)
+				http.Error(w, "Error: SQL all users", http.StatusBadRequest)
+				return
+			}
+			usersArr = append(usersArr, uTmp)
+		}
+		sendStatus(http.StatusOK, w)
+		json.NewEncoder(w).Encode(usersArr) //Сама отправка. Стоит добавить обработку err
+
 	}
 
 }
@@ -174,6 +185,6 @@ func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 
 	r.Get("/users", getAllUsersDB(db))
 
-	r.HandleFunc("/users", UsersHandler)
-	r.HandleFunc("/users/{id}", UsersIdHandler)
+	// r.HandleFunc("/users", UsersHandler)
+	// r.HandleFunc("/users/{id}", UsersIdHandler)
 }
