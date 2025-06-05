@@ -29,17 +29,39 @@ func getAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 			var uTmp models.User
 			err := rows.Scan(&uTmp.Id, &uTmp.Name, &uTmp.Age, &uTmp.Is_student)
 			if err != nil {
-				fmt.Printf("SQL ERR=%s", err)
-				http.Error(w, "Error: SQL all users", http.StatusBadRequest)
+				// fmt.Printf("SQL ERR=%s", err)
+				http.Error(w, "Error: Scan SQL all users", http.StatusBadRequest)
 				return
 			}
 			usersArr = append(usersArr, uTmp)
 		}
 		sendStatus(http.StatusOK, w)
 		json.NewEncoder(w).Encode(usersArr) //Сама отправка. Стоит добавить обработку err
-
 	}
+}
 
+func getIdUsersDB(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		row := db.QueryRow(r.Context(), "SELECT * FROM users where id = $1", id)
+
+		fmt.Printf("getIdUsersDB WORK\n")
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+		// defer row.Close()
+		var user models.User
+
+		errScan := row.Scan(&user.Id, &user.Name, &user.Age, &user.Is_student)
+		if errScan != nil {
+			fmt.Printf("SQL ERROR=%s\n", errScan)
+			http.Error(w, "Error: Scan SQL user", http.StatusBadRequest)
+			return
+		}
+		sendStatus(http.StatusOK, w)
+		json.NewEncoder(w).Encode(user)
+	}
 }
 
 //END FOR DATABASE
@@ -184,6 +206,7 @@ func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 	defer rows_2.Close()
 
 	r.Get("/users", getAllUsersDB(db))
+	r.Get("/users/{id}", getIdUsersDB(db))
 
 	// r.HandleFunc("/users", UsersHandler)
 	// r.HandleFunc("/users/{id}", UsersIdHandler)
