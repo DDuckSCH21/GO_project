@@ -55,12 +55,35 @@ func getIdUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 
 		errScan := row.Scan(&user.Id, &user.Name, &user.Age, &user.Is_student)
 		if errScan != nil {
-			fmt.Printf("SQL ERROR=%s\n", errScan)
-			http.Error(w, "Error: Scan SQL user", http.StatusBadRequest)
+			http.Error(w, "User not found", http.StatusNotFound)
 			return
 		}
 		sendStatus(http.StatusOK, w)
 		json.NewEncoder(w).Encode(user)
+	}
+}
+
+func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет заданную запись, полностью
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		var user models.User
+		// row := db.QueryRow(r.Context())
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		row := db.QueryRow(r.Context(), //TODO прочитать про db.Exec
+			"UPDATE users u SET name = $1, age = $2, is_student = $3 WHERE id = $4",
+			user.Name, user.Age, user.Is_student, id) //Если значений нет - оставляет старые
+
+		// fmt.Println(row.Scan())
+		//no rows in result set - даже если апдейтнулось
+		row = row //Такое себе, переделать потом
+		sendStatus(http.StatusOK, w)
+
 	}
 }
 
@@ -207,6 +230,7 @@ func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 
 	r.Get("/users", getAllUsersDB(db))
 	r.Get("/users/{id}", getIdUsersDB(db))
+	r.Put("/users/{id}", putIdUserDB(db))
 
 	// r.HandleFunc("/users", UsersHandler)
 	// r.HandleFunc("/users/{id}", UsersIdHandler)
