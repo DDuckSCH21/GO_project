@@ -75,15 +75,30 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 		}
 		defer r.Body.Close()
 
-		row := db.QueryRow(r.Context(), //TODO прочитать про db.Exec
+		_, errEx := db.Exec(r.Context(), //TODO прочитать про db.Exec
 			"UPDATE users u SET name = $1, age = $2, is_student = $3 WHERE id = $4",
 			user.Name, user.Age, user.Is_student, id) //Если значений нет - оставляет старые
 
+		if errEx != nil {
+			http.Error(w, "Error: DB execution", http.StatusBadRequest)
+			return
+		}
 		// fmt.Println(row.Scan())
 		//no rows in result set - даже если апдейтнулось
-		row = row //Такое себе, переделать потом
 		sendStatus(http.StatusOK, w)
 
+	}
+}
+
+func deleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//TODO
+	}
+}
+
+func postUserDB(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//TODO
 	}
 }
 
@@ -203,7 +218,7 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 
 	// fmt.Println("INSERT")
-	rows, err := db.Query(context.Background(), "INSERT INTO public.users (id, name,age,is_student) VALUES (2,'SanPusan',21,true);") //TODO Заготовка для postUser
+	rows, err := db.Query(context.Background(), "INSERT INTO public.users (name,age,is_student) VALUES ('SanPusan',21,true);") //TODO Заготовка для postUser
 
 	if err != nil {
 		panic(err)
