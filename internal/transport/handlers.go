@@ -80,11 +80,11 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 			user.Name, user.Age, user.Is_student, id) //Если значений нет - оставляет старые
 
 		if errEx != nil {
-			http.Error(w, "Error: DB execution", http.StatusBadRequest)
+			http.Error(w, "Error: DB UPDATE", http.StatusBadRequest)
 			return
 		}
-		// fmt.Println(row.Scan())
-		//no rows in result set - даже если апдейтнулось
+		// fmt.Printf("putIdUserDB row=%s\n", row)
+		//UPDATE 1 если апдейтнулось и 0 если нет
 		sendStatus(http.StatusOK, w)
 
 	}
@@ -92,7 +92,27 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 
 func deleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		//TODO
+		id := chi.URLParam(r, "id")
+		var user models.User
+		// row := db.QueryRow(r.Context())
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		_, errEx := db.Exec(r.Context(),
+			"DELETE from users WHERE id = $1", id)
+
+		if errEx != nil {
+			http.Error(w, "Error: DB DELETE", http.StatusBadRequest)
+			return
+		}
+		// fmt.Printf("deleteIdUserDB res=%s\n", row)
+		//DELETE 1 если удалил и 0, если нечего было удалять
+		sendStatus(http.StatusOK, w)
+
 	}
 }
 
@@ -246,6 +266,7 @@ func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 	r.Get("/users", getAllUsersDB(db))
 	r.Get("/users/{id}", getIdUsersDB(db))
 	r.Put("/users/{id}", putIdUserDB(db))
+	r.Delete("/users/{id}", deleteIdUserDB(db))
 
 	// r.HandleFunc("/users", UsersHandler)
 	// r.HandleFunc("/users/{id}", UsersIdHandler)
