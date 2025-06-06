@@ -29,7 +29,6 @@ func getAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 			var uTmp models.User
 			err := rows.Scan(&uTmp.Id, &uTmp.Name, &uTmp.Age, &uTmp.Is_student)
 			if err != nil {
-				// fmt.Printf("SQL ERR=%s", err)
 				http.Error(w, "Error: Scan SQL all users", http.StatusBadRequest)
 				return
 			}
@@ -45,12 +44,6 @@ func getIdUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 		id := chi.URLParam(r, "id")
 		row := db.QueryRow(r.Context(), "SELECT * FROM users where id = $1", id)
 
-		fmt.Printf("getIdUsersDB WORK\n")
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
-		// defer row.Close()
 		var user models.User
 
 		errScan := row.Scan(&user.Id, &user.Name, &user.Age, &user.Is_student)
@@ -67,7 +60,7 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 		var user models.User
-		// row := db.QueryRow(r.Context())
+
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
 			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
@@ -75,7 +68,7 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 		}
 		defer r.Body.Close()
 
-		_, errEx := db.Exec(r.Context(), //TODO прочитать про db.Exec
+		_, errEx := db.Exec(r.Context(),
 			"UPDATE users u SET name = $1, age = $2, is_student = $3 WHERE id = $4",
 			user.Name, user.Age, user.Is_student, id) //Если значений нет - оставляет старые
 
@@ -93,13 +86,7 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 func deleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-		var user models.User
-		// row := db.QueryRow(r.Context())
-		err := json.NewDecoder(r.Body).Decode(&user)
-		if err != nil {
-			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
-			return
-		}
+
 		defer r.Body.Close()
 
 		_, errEx := db.Exec(r.Context(),
@@ -118,7 +105,30 @@ func deleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
 
 func postUserDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		//TODO
+
+		var user models.User
+		var newId int
+		// row := db.QueryRow(r.Context())
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			http.Error(w, "Error: Decode JSON", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		rowCount := db.QueryRow(r.Context(), "SELECT max(id)+1 FROM users") //Костыль, если в таблице нет автоинкремента
+		rowCount.Scan(&newId)
+		_, errEx := db.Exec(r.Context(),
+			"INSERT INTO users (id, name, age, is_student) VALUES ($1, $2, $3, $4)",
+			newId, user.Name, user.Age, user.Is_student)
+
+		if errEx != nil {
+			http.Error(w, "Error: DB INSERT", http.StatusBadRequest)
+			return
+		}
+		// fmt.Printf("postUserDB res=%s\n", row)
+		//"INSERT 0 1" если заинсертил
+		sendStatus(http.StatusOK, w)
 	}
 }
 
@@ -267,6 +277,7 @@ func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 	r.Get("/users/{id}", getIdUsersDB(db))
 	r.Put("/users/{id}", putIdUserDB(db))
 	r.Delete("/users/{id}", deleteIdUserDB(db))
+	r.Post("/users", postUserDB(db))
 
 	// r.HandleFunc("/users", UsersHandler)
 	// r.HandleFunc("/users/{id}", UsersIdHandler)
