@@ -17,7 +17,7 @@ export default function () {
   // 1. POST /users — создание пользователя
   const createUserPayload = JSON.stringify({
     name: "Alexey",
-    age: 20,
+    age: "20",
     is_student: false,
   });
 
