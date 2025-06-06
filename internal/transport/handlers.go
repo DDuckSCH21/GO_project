@@ -2,7 +2,6 @@ package transport
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go_project/internal/models"
@@ -124,8 +123,8 @@ func postUserDB(db *pgxpool.Pool) http.HandlerFunc {
 		}
 		// fmt.Printf("postUserDB res=%s\n", row)
 		//"INSERT 0 1" если заинсертил
-		sendStatus(http.StatusOK, w)
-		fmt.Fprintf(w, "Add new User id=[%d]\n", newId)
+		sendStatus(201, w)
+		// fmt.Fprintf(w, "Add new User id=[%d]\n", newId)
 	}
 }
 
@@ -140,8 +139,8 @@ func sendStatus(status int, w http.ResponseWriter) {
 
 func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 
-	r.Get("/users", getAllUsersDB(db))
 	r.Get("/users/{id}", getIdUsersDB(db))
+	r.Get("/users", getAllUsersDB(db))
 	r.Put("/users/{id}", putIdUserDB(db))
 	r.Delete("/users/{id}", deleteIdUserDB(db))
 	r.Post("/users", postUserDB(db))
