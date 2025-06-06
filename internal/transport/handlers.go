@@ -129,6 +129,7 @@ func postUserDB(db *pgxpool.Pool) http.HandlerFunc {
 		// fmt.Printf("postUserDB res=%s\n", row)
 		//"INSERT 0 1" если заинсертил
 		sendStatus(http.StatusOK, w)
+		fmt.Fprintf(w, "Add new User id=[%d]\n", newId)
 	}
 }
 
