@@ -44,7 +44,7 @@ export default function () {
 
   // 4. PUT /users/:id — обновление возраста пользователя
   const updateUserPayload = JSON.stringify({
-    age: 21,
+    age: "21",
   });
 
   const updateUserRes = http.put(`${BASE_URL}/users/${randomId}`, updateUserPayload, {

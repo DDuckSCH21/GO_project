@@ -10,7 +10,7 @@ import (
 
 //FOR DATABASE
 
-func getAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
+func GetAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query(r.Context(), "SELECT * FROM users")
 		if err != nil {
@@ -34,7 +34,7 @@ func getAllUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
-func getIdUsersDB(db *pgxpool.Pool) http.HandlerFunc {
+func GetIdUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 		row := db.QueryRow(r.Context(), "SELECT * FROM users where id = $1", id)
@@ -51,7 +51,7 @@ func getIdUsersDB(db *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
-func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет заданную запись, полностью
+func PutIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет заданную запись, полностью
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 		var user models.User
@@ -78,7 +78,7 @@ func putIdUserDB(db *pgxpool.Pool) http.HandlerFunc { //Обновляет за�
 	}
 }
 
-func deleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
+func DeleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
@@ -98,11 +98,11 @@ func deleteIdUserDB(db *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
-func postUserDB(db *pgxpool.Pool) http.HandlerFunc {
+func PostUserDB(db *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var user models.User
-		var newId int
+		// var newId int
 		// row := db.QueryRow(r.Context())
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
@@ -111,11 +111,11 @@ func postUserDB(db *pgxpool.Pool) http.HandlerFunc {
 		}
 		defer r.Body.Close()
 
-		rowCount := db.QueryRow(r.Context(), "SELECT max(id)+1 FROM users") //Костыль, если в таблице нет автоинкремента
-		rowCount.Scan(&newId)
+		// rowCount := db.QueryRow(r.Context(), "SELECT max(id)+1 FROM users") //Костыль, если в таблице нет автоинкремента
+		// rowCount.Scan(&newId)
 		_, errEx := db.Exec(r.Context(),
-			"INSERT INTO users (id, name, age, is_student) VALUES ($1, $2, $3, $4)",
-			newId, user.Name, user.Age, user.Is_student)
+			"INSERT INTO users (name, age, is_student) VALUES ($1, $2, $3)",
+			user.Name, user.Age, user.Is_student)
 
 		if errEx != nil {
 			http.Error(w, "Error: DB INSERT", http.StatusBadRequest)
@@ -139,9 +139,4 @@ func sendStatus(status int, w http.ResponseWriter) {
 
 func MasterHandler(r *chi.Mux, db *pgxpool.Pool) {
 
-	r.Get("/users/{id}", getIdUsersDB(db))
-	r.Get("/users", getAllUsersDB(db))
-	r.Put("/users/{id}", putIdUserDB(db))
-	r.Delete("/users/{id}", deleteIdUserDB(db))
-	r.Post("/users", postUserDB(db))
 }

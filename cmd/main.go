@@ -21,7 +21,13 @@ func main() {
 	//new_end
 
 	r := chi.NewRouter()
-	transport.MasterHandler(r, db)
+
+	r.Get("/users/{id}", transport.GetAllUsersDB(db))
+	r.Get("/users", transport.GetAllUsersDB(db))
+	r.Put("/users/{id}", transport.PutIdUserDB(db))
+	r.Delete("/users/{id}", transport.DeleteIdUserDB(db))
+	r.Post("/users", transport.PostUserDB(db))
+	// transport.MasterHandler(r, db)
 
 	http.ListenAndServe(":8080", r)
 }
