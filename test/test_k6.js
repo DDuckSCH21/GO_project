@@ -17,7 +17,7 @@ export default function () {
   // 1. POST /users — создание пользователя
   const createUserPayload = JSON.stringify({
     name: "Alexey",
-    age: 20,
+    age: "20",
     is_student: false,
   });
 
@@ -44,7 +44,7 @@ export default function () {
 
   // 4. PUT /users/:id — обновление возраста пользователя
   const updateUserPayload = JSON.stringify({
-    age: 21,
+    age: "21",
   });
 
   const updateUserRes = http.put(`${BASE_URL}/users/${randomId}`, updateUserPayload, {
